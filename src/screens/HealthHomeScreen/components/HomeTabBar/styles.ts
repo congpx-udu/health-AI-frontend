@@ -28,4 +28,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Palette.primary,
   },
+  fabActive: {
+    backgroundColor: Palette.tabIconActive,
+  },
 });
