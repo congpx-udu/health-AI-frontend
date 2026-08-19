@@ -1,6 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Tabs } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
 export default function RootLayout() {
@@ -8,23 +7,16 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Tabs>
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Quét',
-            headerShown: false,
-            tabBarIcon: ({ color, size }) => <Ionicons name="scan-outline" color={color} size={size} />,
-          }}
-        />
-        <Tabs.Screen
-          name="result"
-          options={{
-            href: null,
-            headerShown: false,
-          }}
-        />
-      </Tabs>
+      {/*
+        Dùng Stack thay cho Tabs: HealthHomeScreen đã có thanh tab riêng theo thiết kế,
+        lồng thêm Tabs của expo-router sẽ ra hai thanh tab chồng nhau.
+      */}
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="chat" />
+        <Stack.Screen name="scan" />
+        <Stack.Screen name="result" />
+      </Stack>
     </ThemeProvider>
   );
 }
