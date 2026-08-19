@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,6 +18,7 @@ import { styles } from './styles';
 
 const HealthHomeScreen = () => {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
@@ -33,7 +35,11 @@ const HealthHomeScreen = () => {
           <SectionHeader title="Đặt lịch" />
           <ExpertBookingCard />
 
-          <SectionHeader title="Hoạt động hôm nay" actionLabel="Thêm mới" />
+          <SectionHeader
+            title="Hoạt động hôm nay"
+            actionLabel="Thêm mới"
+            onActionPress={() => router.push('/scan')}
+          />
           <CalorieRingCard />
           <NutritionIndexCard />
 

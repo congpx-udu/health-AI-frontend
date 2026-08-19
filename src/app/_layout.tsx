@@ -7,9 +7,14 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      {/*
+        Dùng Stack thay cho Tabs: HealthHomeScreen đã có thanh tab riêng theo thiết kế,
+        lồng thêm Tabs của expo-router sẽ ra hai thanh tab chồng nhau.
+      */}
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
-        <Stack.Screen name="explore" options={{ headerShown: true, title: 'Explore' }} />
+        <Stack.Screen name="scan" />
+        <Stack.Screen name="result" />
       </Stack>
     </ThemeProvider>
   );

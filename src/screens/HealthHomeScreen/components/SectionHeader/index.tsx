@@ -8,14 +8,15 @@ import { styles } from './styles';
 type SectionHeaderProps = {
   title: string;
   actionLabel?: string;
+  onActionPress?: () => void;
 };
 
-const SectionHeader = ({ title, actionLabel }: SectionHeaderProps) => {
+const SectionHeader = ({ title, actionLabel, onActionPress }: SectionHeaderProps) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       {actionLabel ? (
-        <Pressable style={styles.action}>
+        <Pressable style={styles.action} onPress={onActionPress}>
           <Ionicons name="add" size={15} color={Palette.textPrimary} />
           <Text style={styles.actionLabel}>{actionLabel}</Text>
         </Pressable>
