@@ -12,15 +12,16 @@ export default function RootLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" color={color} size={size} />,
+            title: 'Quét',
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => <Ionicons name="scan-outline" color={color} size={size} />,
           }}
         />
         <Tabs.Screen
-          name="explore"
+          name="result"
           options={{
-            title: 'Explore',
-            tabBarIcon: ({ color, size }) => <Ionicons name="compass-outline" color={color} size={size} />,
+            href: null,
+            headerShown: false,
           }}
         />
       </Tabs>
