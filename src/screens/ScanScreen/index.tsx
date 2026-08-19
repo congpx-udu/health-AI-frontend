@@ -1,30 +1,47 @@
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Image,
+  Platform,
   Pressable,
   Text,
   View,
 } from 'react-native';
 import { MI_QUANG_RESULT } from '@/constants/mockScanResult';
+import { scanFood } from '@/services/foodApi';
 import { styles } from './styles';
 
 export default function ScanScreen() {
   const router = useRouter();
+  const cameraRef = useRef<CameraView>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const [scanning, setScanning] = useState(false);
 
-  const handleScan = () => {
+  const handleScan = async () => {
     if (scanning) return;
     setScanning(true);
-    // Giả lập AI phân tích ảnh trong 1.5s rồi mở màn kết quả
-    setTimeout(() => {
+    try {
+      const photo = await cameraRef.current?.takePictureAsync({ quality: 0.7 });
+      if (!photo?.uri) throw new Error('Không chụp được ảnh');
+
+      // Gửi ảnh lên backend FastAPI để nhận diện + lấy thông tin dinh dưỡng
+      const result = await scanFood(photo.uri);
+      router.push({ pathname: '/result', params: { food: JSON.stringify(result.food) } });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (Platform.OS === 'web') {
+        // eslint-disable-next-line no-alert
+        alert(`Không quét được: ${message}\nKiểm tra backend đã chạy ở cổng 8000 chưa.`);
+      } else {
+        Alert.alert('Không quét được', `${message}\nKiểm tra backend đã chạy ở cổng 8000 chưa.`);
+      }
+    } finally {
       setScanning(false);
-      router.push('/result');
-    }, 1500);
+    }
   };
 
   const hasCamera = permission?.granted;
@@ -32,7 +49,7 @@ export default function ScanScreen() {
   return (
     <View style={styles.container}>
       {hasCamera ? (
-        <CameraView style={styles.camera} facing="back" />
+        <CameraView ref={cameraRef} style={styles.camera} facing="back" />
       ) : (
         // Chưa có quyền camera: dùng ảnh mẫu làm khung xem trước
         <Image source={MI_QUANG_RESULT.image} style={styles.camera} resizeMode="cover" />
@@ -59,7 +76,10 @@ export default function ScanScreen() {
 
       {/* Nút chụp */}
       <View style={styles.bottomBar}>
-        <Pressable style={styles.captureBtn} onPress={handleScan} disabled={scanning}>
+        <Pressable
+          style={styles.captureBtn}
+          onPress={handleScan}
+          disabled={scanning || !hasCamera}>
           {scanning ? (
             <ActivityIndicator color="#fff" size="large" />
           ) : (
