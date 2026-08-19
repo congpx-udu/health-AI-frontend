@@ -1,13 +1,64 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MI_QUANG_RESULT as result } from '@/constants/mockScanResult';
+import { MI_QUANG_RESULT, PHO_BO_RESULT, ScanResult } from '@/constants/mockScanResult';
+import { API_BASE, ApiFood } from '@/services/foodApi';
 import { styles } from './styles';
+
+// Ảnh local dự phòng khi backend không trả image_url
+const LOCAL_IMAGES: Record<string, number> = {
+  mi_quang: MI_QUANG_RESULT.image,
+  pho_bo_tai_nam: PHO_BO_RESULT.image,
+};
+
+type DisplayData = Omit<ScanResult, 'image'> & { imageSource: any };
+
+function fromApiFood(food: ApiFood): DisplayData {
+  return {
+    id: food.id,
+    imageSource: food.image_url
+      ? { uri: `${API_BASE}${food.image_url}` }
+      : LOCAL_IMAGES[food.id] ?? MI_QUANG_RESULT.image,
+    meal: food.meal_type.toUpperCase(),
+    category: food.category.toUpperCase(),
+    name: food.name,
+    description: food.description,
+    healthScore: food.health_score,
+    warning: food.warning,
+    calories: food.calories,
+    macros: food.macros.map((m) => ({
+      label: m.label.toUpperCase(),
+      value: `${m.value}${m.unit}`,
+      percent: m.percent / 100,
+      note: m.note,
+    })),
+    aiAdvice: [...food.analysis, food.advice],
+    ingredients: food.ingredients.map((i) => ({ name: i.name, kcal: i.calories })),
+  };
+}
+
+function fromMock(mock: ScanResult): DisplayData {
+  const { image, ...rest } = mock;
+  return { ...rest, imageSource: image };
+}
 
 export default function ScanResultScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { food, id } = useLocalSearchParams<{ food?: string; id?: string }>();
+
+  const result = useMemo<DisplayData>(() => {
+    if (food) {
+      try {
+        return fromApiFood(JSON.parse(food) as ApiFood);
+      } catch {
+        // rơi xuống mock nếu param hỏng
+      }
+    }
+    return fromMock(id === 'botainam' ? PHO_BO_RESULT : MI_QUANG_RESULT);
+  }, [food, id]);
 
   return (
     <ScrollView
@@ -27,7 +78,7 @@ export default function ScanResultScreen() {
 
       {/* Ảnh món ăn + điểm sức khỏe */}
       <View style={styles.heroWrap}>
-        <Image source={result.image} style={styles.heroImage} resizeMode="cover" />
+        <Image source={result.imageSource} style={styles.heroImage} resizeMode="cover" />
         <View style={styles.scoreBadge}>
           <Ionicons name="heart" size={120} color="rgba(255,255,255,0.8)" style={styles.scoreHeart} />
           <View style={styles.scoreContent}>
